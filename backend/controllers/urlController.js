@@ -49,7 +49,10 @@ export const generateQRCode = async (req, res) => {
     const url = await Url.findOne({ shortCode });
     if (!url) return res.status(404).json({ error: "URL not found" });
 
-    const qr = await QRCode.toDataURL(`${process.env.BASE_URL}/${shortCode}`);
+    // IMPORTANT: BASE_URL should be set in .env file
+    // For mobile access, use your computer's IP: http://10.106.18.37:5000
+    const baseUrl = process.env.BASE_URL || "http://10.106.18.37:5000";
+    const qr = await QRCode.toDataURL(`${baseUrl}/${shortCode}`);
     res.json({ qr });
   } catch (error) {
     res.status(500).json({ error: "Server Error" });
