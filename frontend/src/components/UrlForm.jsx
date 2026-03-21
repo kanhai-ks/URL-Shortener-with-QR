@@ -1,50 +1,72 @@
 import React, { useState } from "react";
 import { shortenUrl, getQRCode } from "../services/api";
-import { toast } from "react-toastify";
-// import QRCode from "qrcode.react";
+import CopyButton from "./CopyButton";
+import LoadingSpinner from "./LoadingSpinner";
 
-const UrlForm = () => {
-  const [url, setUrl] = useState("");
+const UrlForm = ({ initialUrl = "" }) => {
+  const [url, setUrl] = useState(initialUrl);
   const [shortUrl, setShortUrl] = useState("");
   const [qrCode, setQrCode] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!url.trim()) return;
+
+    setLoading(true);
     try {
-      const { data } = await shortenUrl(url);
-      setShortUrl(`${process.env.REACT_APP_API_URL}/${data.shortCode}`);
-      const qr = await getQRCode(data.shortCode);
-      setQrCode(qr.data.qr);
-      toast.success("URL shortened successfully!");
-    } catch (error) {
-      toast.error("Error shortening URL");
+      const { data } = await shortenUrl({ originalUrl: url });
+      const baseUrl = (
+        import.meta.env.VITE_API_URL || window.location.origin
+      ).replace(/\/$/, "");
+      const fullShortUrl = `${baseUrl}/${data.shortCode}`;
+      setShortUrl(fullShortUrl);
+
+      const qrResponse = await getQRCode(data.shortCode);
+      setQrCode(qrResponse.data.qr);
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Failed to shorten URL");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="p-4">
-      <form onSubmit={handleSubmit} className="flex gap-2">
+    <div className="card max-w-xl mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input
-          type="text"
-          placeholder="Enter URL"
+          type="url"
+          placeholder="Enter URL..."
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          className="border p-2 w-full"
+          className="input-field"
+          required
         />
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2">
-          Shorten
+        <button type="submit" className="btn-primary w-full" disabled={loading}>
+          {loading ? <LoadingSpinner /> : "🚀 Shorten URL"}
         </button>
       </form>
 
       {shortUrl && (
-        <div className="mt-4">
-          <p>
-            Short URL:{" "}
-            <a href={shortUrl} target="_blank" rel="noreferrer">
-              {shortUrl}
-            </a>
-          </p>
-          {qrCode && <img src={qrCode} alt="QR Code" />}
+        <div className="mt-6 text-center space-y-3">
+          <p className="font-bold text-lg">Your Short URL:</p>
+          <a
+            href={shortUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-blue-600 underline"
+          >
+            {shortUrl}
+          </a>
+          <CopyButton text={shortUrl} />
+
+          {qrCode && (
+            <div className="mt-6">
+              <p className="font-semibold">📱 QR Code</p>
+              <img src={qrCode} alt="QR Code" className="mx-auto w-48 h-48" />
+            </div>
+          )}
         </div>
       )}
     </div>
