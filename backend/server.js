@@ -6,8 +6,8 @@ import helmet from "helmet";
 import connectDB from "./config/db.js";
 import urlRoutes from "./routes/urlRoutes.js";
 
-dotenv.config(); // Load .env first
-connectDB(); // Connect to MongoDB
+dotenv.config();
+connectDB();
 
 const app = express();
 app.use(express.json());

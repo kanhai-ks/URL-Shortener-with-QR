@@ -15,15 +15,15 @@ const UrlForm = ({ initialUrl = "" }) => {
 
     setLoading(true);
     try {
-      const { data } = await shortenUrl({ originalUrl: url });
+      const data = await shortenUrl({ originalUrl: url }); // FIXED
       const baseUrl = (
         import.meta.env.VITE_API_URL || window.location.origin
       ).replace(/\/$/, "");
       const fullShortUrl = `${baseUrl}/${data.shortCode}`;
       setShortUrl(fullShortUrl);
 
-      const qrResponse = await getQRCode(data.shortCode);
-      setQrCode(qrResponse.data.qr);
+      const qrResponse = await getQRCode(data.shortCode); // FIXED
+      setQrCode(qrResponse.qr);
     } catch (err) {
       console.error("Error:", err);
       alert("Failed to shorten URL");

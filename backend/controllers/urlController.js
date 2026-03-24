@@ -48,8 +48,8 @@ export const generateQRCode = async (req, res) => {
     const { shortCode } = req.params;
     const url = await Url.findOne({ shortCode });
     if (!url) return res.status(404).json({ error: "URL not found" });
-
-    const qr = await QRCode.toDataURL(`${process.env.BASE_URL}/${shortCode}`);
+    const baseUrl = process.env.BASE_URL;
+    const qr = await QRCode.toDataURL(`${baseUrl}/${shortCode}`);
     res.json({ qr });
   } catch (error) {
     res.status(500).json({ error: "Server Error" });

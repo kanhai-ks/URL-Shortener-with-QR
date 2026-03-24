@@ -10,7 +10,7 @@ const UrlList = () => {
   useEffect(() => {
     const fetchUrls = async () => {
       try {
-        const { data } = await getAllUrls();
+        const data = await getAllUrls(); // FIXED: returns data directly
         setUrls(data);
       } catch (err) {
         console.error("Error fetching URLs:", err);
